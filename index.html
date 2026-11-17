@@ -1,0 +1,1132 @@
+
+<!DOCTYPE html>
+
+
+<html>
+
+
+<head>
+
+
+    <meta charset="UTF-8">
+
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+
+    <title>AI Crop Flow Assistant</title>
+
+
+
+
+    <style>
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+
+
+        body {
+
+
+            margin: 0;
+
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e8f5e9,
+                    #f1f8e9
+                );
+
+
+            color: #1b5e20;
+        }
+
+
+
+
+        header {
+
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #1b5e20,
+                    #43a047
+                );
+
+
+            color: white;
+
+
+            padding: 30px;
+
+
+            text-align: center;
+
+
+            box-shadow:
+                0 4px 15px
+                rgba(0,0,0,0.15);
+        }
+
+
+
+
+        header h1 {
+
+
+            margin: 0;
+
+
+            font-size: 32px;
+        }
+
+
+
+
+        header p {
+
+
+            margin-top: 8px;
+
+
+            opacity: 0.9;
+        }
+
+
+
+
+        .container {
+
+
+            max-width: 1100px;
+
+
+            margin: 30px auto;
+
+
+            padding: 0 20px;
+        }
+
+
+
+
+        .connection {
+
+
+            background: white;
+
+
+            padding: 15px 20px;
+
+
+            border-radius: 12px;
+
+
+            margin-bottom: 20px;
+
+
+            box-shadow:
+                0 3px 10px
+                rgba(0,0,0,0.08);
+        }
+
+
+
+
+        .online {
+
+
+            color: #2e7d32;
+
+
+            font-weight: bold;
+        }
+
+
+
+
+        .offline {
+
+
+            color: #c62828;
+
+
+            font-weight: bold;
+        }
+
+
+
+
+        .grid {
+
+
+            display: grid;
+
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(220px, 1fr)
+                );
+
+
+            gap: 20px;
+        }
+
+
+
+
+        .card {
+
+
+            background: white;
+
+
+            padding: 22px;
+
+
+            border-radius: 15px;
+
+
+            box-shadow:
+                0 4px 12px
+                rgba(0,0,0,0.08);
+        }
+
+
+
+
+        .card h3 {
+
+
+            margin-top: 0;
+
+
+            color: #2e7d32;
+        }
+
+
+
+
+        .value {
+
+
+            font-size: 30px;
+
+
+            font-weight: bold;
+
+
+            margin-top: 10px;
+
+
+            color: #1b5e20;
+        }
+
+
+
+
+        .status {
+
+
+            display: inline-block;
+
+
+            padding: 8px 14px;
+
+
+            border-radius: 20px;
+
+
+            font-weight: bold;
+
+
+            margin-top: 10px;
+        }
+
+
+
+
+        .on {
+
+
+            background: #c8e6c9;
+
+
+            color: #1b5e20;
+        }
+
+
+
+
+        .off {
+
+
+            background: #eeeeee;
+
+
+            color: #555555;
+        }
+
+
+
+
+        .rain {
+
+
+            background: #bbdefb;
+
+
+            color: #0d47a1;
+        }
+
+
+
+
+        .motor-card {
+
+
+            grid-column:
+                1 / -1;
+
+
+            text-align: center;
+
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #e8f5e9
+                );
+        }
+
+
+
+
+        .motor-status {
+
+
+            font-size: 40px;
+
+
+            font-weight: bold;
+
+
+            margin: 15px;
+        }
+
+
+
+
+        button {
+
+
+            border: none;
+
+
+            padding: 14px 30px;
+
+
+            margin: 8px;
+
+
+            border-radius: 10px;
+
+
+            font-size: 17px;
+
+
+            font-weight: bold;
+
+
+            cursor: pointer;
+        }
+
+
+
+
+        .start {
+
+
+            background: #43a047;
+
+
+            color: white;
+        }
+
+
+
+
+        .stop {
+
+
+            background: #e53935;
+
+
+            color: white;
+        }
+
+
+
+
+        button:hover {
+
+
+            opacity: 0.85;
+        }
+
+
+
+
+        .footer {
+
+
+            text-align: center;
+
+
+            margin: 30px;
+
+
+            color: #666;
+        }
+
+
+    </style>
+
+
+</head>
+
+
+
+
+<body>
+
+
+
+
+<header>
+
+
+    <h1>🌱 AI Crop Flow Assistant</h1>
+
+
+    <p>
+        Local Crop Monitoring & Motor Control
+    </p>
+
+
+</header>
+
+
+
+
+<div class="container">
+
+
+
+
+    <!-- CONNECTION -->
+
+
+    <div class="connection">
+
+
+        Arduino:
+
+
+        <span
+            id="connection"
+            class="offline"
+        >
+            Checking...
+        </span>
+
+
+        <br>
+
+
+        Last update:
+
+
+        <span id="lastUpdate">
+            --
+        </span>
+
+
+    </div>
+
+
+
+
+    <!-- DASHBOARD -->
+
+
+    <div class="grid">
+
+
+
+
+        <!-- MOTOR -->
+
+
+        <div class="card motor-card">
+
+
+            <h3>💧 Water Motor</h3>
+
+
+            <div
+                id="motorStatus"
+                class="motor-status"
+            >
+                OFF
+            </div>
+
+
+
+
+            <button
+                class="start"
+                onclick="turnMotorOn()"
+            >
+                ▶ TURN MOTOR ON
+            </button>
+
+
+
+
+            <button
+                class="stop"
+                onclick="turnMotorOff()"
+            >
+                ■ TURN MOTOR OFF
+            </button>
+
+
+        </div>
+
+
+
+
+        <!-- RAIN -->
+
+
+        <div class="card">
+
+
+            <h3>🌧 Rain Sensor</h3>
+
+
+            <div
+                id="rainStatus"
+                class="status off"
+            >
+                NO RAIN
+            </div>
+
+
+            <div
+                id="rainValue"
+                class="value"
+            >
+                0
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- CROP COLOUR -->
+
+
+        <div class="card">
+
+
+            <h3>🌿 Crop Colour</h3>
+
+
+            <div
+                id="cropColor"
+                class="value"
+            >
+                UNKNOWN
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- SOUND -->
+
+
+        <div class="card">
+
+
+            <h3>🎤 Sound Sensor</h3>
+
+
+            <div
+                id="soundValue"
+                class="value"
+            >
+                0
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- BUZZER -->
+
+
+        <div class="card">
+
+
+            <h3>🔔 Buzzer</h3>
+
+
+            <div
+                id="buzzerStatus"
+                class="status off"
+            >
+                OFF
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- RED -->
+
+
+        <div class="card">
+
+
+            <h3>🔴 Red Reading</h3>
+
+
+            <div
+                id="red"
+                class="value"
+            >
+                0
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- GREEN -->
+
+
+        <div class="card">
+
+
+            <h3>🟢 Green Reading</h3>
+
+
+            <div
+                id="green"
+                class="value"
+            >
+                0
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- BLUE -->
+
+
+        <div class="card">
+
+
+            <h3>🔵 Blue Reading</h3>
+
+
+            <div
+                id="blue"
+                class="value"
+            >
+                0
+            </div>
+
+
+        </div>
+
+
+
+
+    </div>
+
+
+</div>
+
+
+
+
+<div class="footer">
+
+
+    AI Crop Flow Assistant • Local Dashboard
+
+
+</div>
+
+
+
+
+<script>
+
+
+
+
+// =====================================================
+// GET SENSOR DATA
+// =====================================================
+
+
+async function updateDashboard() {
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/data"
+            );
+
+
+
+
+        const data =
+            await response.json();
+
+
+
+
+        // ---------------------------------------------
+        // CONNECTION
+        // ---------------------------------------------
+
+
+        const connection =
+            document.getElementById(
+                "connection"
+            );
+
+
+
+
+        if (data.connected) {
+
+
+            connection.textContent =
+                "CONNECTED";
+
+
+            connection.className =
+                "online";
+
+
+        }
+
+
+        else {
+
+
+            connection.textContent =
+                "DISCONNECTED";
+
+
+            connection.className =
+                "offline";
+        }
+
+
+
+
+        // ---------------------------------------------
+        // LAST UPDATE
+        // ---------------------------------------------
+
+
+        document.getElementById(
+            "lastUpdate"
+        ).textContent =
+            data.lastUpdate || "--";
+
+
+
+
+        // ---------------------------------------------
+        // RAIN
+        // ---------------------------------------------
+
+
+        document.getElementById(
+            "rainValue"
+        ).textContent =
+            data.rainValue;
+
+
+
+
+        const rainStatus =
+            document.getElementById(
+                "rainStatus"
+            );
+
+
+
+
+        if (data.rainDetected) {
+
+
+            rainStatus.textContent =
+                "RAIN DETECTED";
+
+
+            rainStatus.className =
+                "status rain";
+
+
+        }
+
+
+        else {
+
+
+            rainStatus.textContent =
+                "NO RAIN";
+
+
+            rainStatus.className =
+                "status off";
+        }
+
+
+
+
+        // ---------------------------------------------
+        // CROP COLOUR
+        // ---------------------------------------------
+
+
+        document.getElementById(
+            "cropColor"
+        ).textContent =
+            data.cropColor;
+
+
+
+
+        // ---------------------------------------------
+        // SOUND
+        // ---------------------------------------------
+
+
+        document.getElementById(
+            "soundValue"
+        ).textContent =
+            data.soundValue;
+
+
+
+
+        // ---------------------------------------------
+        // BUZZER
+        // ---------------------------------------------
+
+
+        const buzzer =
+            document.getElementById(
+                "buzzerStatus"
+            );
+
+
+
+
+        if (data.buzzerOn) {
+
+
+            buzzer.textContent =
+                "ON";
+
+
+            buzzer.className =
+                "status on";
+
+
+        }
+
+
+        else {
+
+
+            buzzer.textContent =
+                "OFF";
+
+
+            buzzer.className =
+                "status off";
+        }
+
+
+
+
+        // ---------------------------------------------
+        // MOTOR
+        // ---------------------------------------------
+
+
+        const motor =
+            document.getElementById(
+                "motorStatus"
+            );
+
+        if (data.pumpOn) {
+
+
+            motor.textContent =
+                "MOTOR ON";
+
+
+            motor.style.color =
+                "#2e7d32";
+
+
+        }
+
+
+        else {
+
+
+            motor.textContent =
+                "MOTOR OFF";
+
+
+            motor.style.color =
+                "#555";
+        }
+
+
+
+
+        // ---------------------------------------------
+        // RGB
+        // ---------------------------------------------
+
+
+        document.getElementById(
+            "red"
+        ).textContent =
+            data.red;
+
+
+
+
+        document.getElementById(
+            "green"
+        ).textContent =
+            data.green;
+
+
+
+
+        document.getElementById(
+            "blue"
+        ).textContent =
+            data.blue;
+
+
+
+
+    }
+
+
+    catch (error) {
+
+
+        console.log(
+            "Dashboard error:",
+            error
+        );
+
+
+    }
+
+
+}
+
+
+
+
+// =====================================================
+// MOTOR ON
+// =====================================================
+
+
+async function turnMotorOn() {
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/motor/on"
+            );
+
+
+
+
+        const result =
+            await response.json();
+
+
+
+
+        if (result.success) {
+
+
+            console.log(
+                "Motor ON command sent"
+            );
+
+
+        }
+
+
+    }
+
+
+    catch (error) {
+
+
+        alert(
+            "Could not communicate with Arduino."
+        );
+
+
+    }
+
+
+}
+
+
+
+
+// =====================================================
+// MOTOR OFF
+// =====================================================
+
+
+async function turnMotorOff() {
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/motor/off"
+            );
+
+
+
+
+        const result =
+            await response.json();
+
+
+
+
+        if (result.success) {
+
+
+            console.log(
+                "Motor OFF command sent"
+            );
+
+
+        }
+
+
+    }
+
+
+    catch (error) {
+
+
+        alert(
+            "Could not communicate with Arduino."
+        );
+
+
+    }
+
+
+}
+
+
+
+
+// =====================================================
+// UPDATE EVERY SECOND
+// =====================================================
+
+
+setInterval(
+    updateDashboard,
+    1000
+);
+
+
+
+
+// Initial update
+
+
+updateDashboard();
+
+
+</script>
+
+
+
+
+</body>
+
+
+</html>
